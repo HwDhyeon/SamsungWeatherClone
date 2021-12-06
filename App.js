@@ -3,12 +3,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import Home from './src/views/Home';
+import { DateUtil, regionMinify } from './src/utils';
 
-const OPEN_WEATHER_API_KEY = 'cd4d167eb3c576a0bd3a83500221ae34';
-const COVID19_API_KEY =
-  'FmSiwMcGckln/XHdi7kaFbngjuh9u/qz2cVdxvMUOWPr1SBEmv0JPp/8BjlFUTRlDnsTz9SH483PacK16Zg8gQ==';
-const AIR_API_KEY =
-  'FmSiwMcGckln/XHdi7kaFbngjuh9u/qz2cVdxvMUOWPr1SBEmv0JPp/8BjlFUTRlDnsTz9SH483PacK16Zg8gQ==';
+const OPEN_WEATHER_API_KEY = 'API_KEY';
+const COVID19_API_KEY = 'API_KEY';
+const AIR_API_KEY = 'API_KEY';
 
 const App = () => {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -36,6 +35,27 @@ const App = () => {
     setWeathers(response.data);
   };
 
+  const getAirData = async ({ region }) => {
+    const sidoName = await regionMinify(region);
+    const response = await axios.get(
+      'http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getCtprvnRltmMesureDnsty',
+      {
+        params: {
+          ServiceKey: AIR_API_KEY,
+          returnType: 'json',
+          pageNo: 1,
+          numOfRows: 100,
+          sidoName,
+          ver: '1.0',
+        },
+      },
+    );
+
+    const data = response.data.response.body.items;
+
+    setAir(data);
+  };
+
   const getLocation = async () => {
     const permission = await Location.requestForegroundPermissionsAsync();
     if (!permission) return;
@@ -56,9 +76,12 @@ const App = () => {
     });
 
     await getWeathers(latitude, longitude);
+    await getAirData(region);
   };
 
   const getCovid19Data = async () => {
+    const date = new DateUtil();
+    const today = `${date.years}${date.month}${date.days}`;
     const response = await axios.get(
       'http://openapi.data.go.kr/openapi/service/rest/Covid19/getCovid19SidoInfStateJson',
       {
@@ -66,33 +89,13 @@ const App = () => {
           ServiceKey: COVID19_API_KEY,
           pageNo: 1,
           numOfRows: 10,
-          startCreateDt: 20211108,
-          endCreateDt: 20211109,
+          startCreateDt: today - 1,
+          endCreateDt: today,
         },
       },
     );
 
     setCovid19(response.data.response.body.items.item);
-  };
-
-  const getAirData = async () => {
-    const response = await axios.get(
-      'http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getCtprvnRltmMesureDnsty',
-      {
-        params: {
-          ServiceKey: AIR_API_KEY,
-          returnType: 'json',
-          pageNo: 1,
-          numOfRows: 100,
-          sidoName: '서울',
-          ver: '1.0',
-        },
-      },
-    );
-
-    const data = response.data.response.body.items;
-
-    setAir(data);
   };
 
   useEffect(() => {
@@ -101,7 +104,6 @@ const App = () => {
 
       await getLocation();
       await getCovid19Data();
-      await getAirData();
       try {
       } catch (e) {
         console.warn(e);

@@ -1,15 +1,39 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Fontisto } from '@expo/vector-icons';
 
-export const iconNames = {
-  Atmosphere: 'cloudy-gusts',
-  Clear: 'sunny',
-  Clouds: 'cloudy',
-  Drizzle: 'rainy-outline',
-  Rain: 'rainy',
-  Snow: 'snow',
-  Thunderstorm: 'thunderstorm',
+export const WeatherIcon = ({ name, size, color }) => {
+  let icon;
+  switch (name) {
+    case 'Atmosphere':
+      icon = <Fontisto name="cloudy-gusts" size={size} color={color} />;
+      break;
+    case 'Clear':
+      icon = <Ionicons name="sunny" size={size} color={color} />;
+      break;
+    case 'Clouds':
+      icon = <Ionicons name="cloudy" size={size} color={color} />;
+      break;
+    case 'Drizzle':
+      icon = <Ionicons name="rainy-outline" size={size} color={color} />;
+      break;
+    case 'Rain':
+      icon = <Ionicons name="rainy" size={size} color={color} />;
+      break;
+    case 'Snow':
+      icon = <Ionicons name="snow" size={size} color={color} />;
+      break;
+    case 'Thunderstorm':
+      icon = <Ionicons name="thunderstorm" size={size} color={color} />;
+      break;
+    case 'Mist':
+      icon = <Fontisto name="fog" size={size} color={color} />;
+      break;
+    default:
+      icon = <Ionicons name="build" size={size} color={color} />;
+      break;
+  }
+  return icon;
 };
 
 export const descriptions = {
@@ -34,7 +58,7 @@ const WeatherBox = ({ width, name, time, temperature, pop }) => {
   return (
     <View style={{ ...styles.box, width }}>
       <Text style={styles.timeText}>{time}</Text>
-      <Ionicons name={iconNames[name]} size={40} color="#88c2e8" />
+      <WeatherIcon name={name} size={40} color="#88c2e8" />
       <Text style={styles.temperatureText}>{temperature}°</Text>
       <View style={styles.popContainer}>
         <Ionicons name="water-outline" size={15} color="#7fb6df" />

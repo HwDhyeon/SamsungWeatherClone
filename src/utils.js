@@ -46,3 +46,15 @@ export class DateUtil {
 
 export const numberWithCommas = (x) =>
   x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+export const regionMinify = (region) => {
+  region = region.replace('특별시', '').replace('광역시', '');
+  if (region.endsWith('도')) {
+    region = region.slice(0, -1);
+    if (region.endsWith('북') || region.endsWith('남')) {
+      region = region.slice(0, 1) + region.slice(-1);
+    }
+  }
+
+  return region;
+};

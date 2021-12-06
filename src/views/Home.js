@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   Dimensions,
@@ -8,13 +8,19 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import Card from '../components/Card';
 import WeatherBoxList from '../components/WeatherBoxList';
 import RoundButton from '../components/RoundButton';
-import { DateUtil, numberWithCommas } from '../utils';
-import { descriptions, iconNames } from '../components/WeatherBox';
+import Card from '../components/Card';
+import { DateUtil, numberWithCommas, regionMinify } from '../utils';
+import { descriptions, WeatherIcon } from '../components/WeatherBox';
+import useAxios from 'axios-hooks';
+import getEnv from '../environment';
+import DayWeather from '../components/DayWeather';
+import WeatherDetail from '../components/WeatherDetail';
+import Line from '../components/Line';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -67,11 +73,32 @@ const Home = ({ location, weathers, covid19, air, onLayout }) => {
     }
   };
 
+  const onPressOpenMenu = () => {};
+
+  const onPressPlusMenu = () => {};
+
   return (
     <SafeAreaView style={styles.container} onLayout={onLayout}>
       <StatusBar style="auto" />
       <View style={styles.header}>
-        <Text>날씨</Text>
+        <View style={styles.headerMenu}>
+          <TouchableOpacity onPress={onPressOpenMenu}>
+            <Ionicons name="menu-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onPressPlusMenu}>
+            <AntDesign name="plus" size={30} color="black" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.headerText}>
+          <Text
+            stlye={{
+              fontWeight: 'bold',
+              fontSize: 40,
+            }}
+          >
+            날씨
+          </Text>
+        </View>
       </View>
       <View style={styles.main}>
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -108,8 +135,8 @@ const Home = ({ location, weathers, covid19, air, onLayout }) => {
                     alignItems: 'center',
                   }}
                 >
-                  <Ionicons
-                    name={iconNames[weathers.current.weather[0].main]}
+                  <WeatherIcon
+                    name={weathers.current.weather[0].main}
                     size={60}
                     color="#88c2e8"
                   />
@@ -170,14 +197,9 @@ const Home = ({ location, weathers, covid19, air, onLayout }) => {
           <Card>
             <View style={styles.cardContainer}>
               <Text style={{ fontWeight: 'bold', fontSize: 17 }}>
-                서울 COVID-19 현황
+                {regionMinify(location.address.region)} COVID-19 현황
               </Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                }}
-              >
+              <View style={styles.rowBetween}>
                 <Image
                   style={{
                     marginTop: 10,
@@ -267,6 +289,38 @@ const Home = ({ location, weathers, covid19, air, onLayout }) => {
               </View>
             </View>
           </Card>
+          <Card></Card>
+          <Card>
+            <View style={styles.cardContainer}>
+              {weathers.daily.map((day, index) => (
+                <DayWeather key={index} day={day} />
+              ))}
+              <View
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: 30,
+                }}
+              >
+                <RoundButton text="더보기" width="30%" />
+              </View>
+            </View>
+          </Card>
+          <Card></Card>
+          <Card></Card>
+          <Card></Card>
+          <Card></Card>
+          <Card>
+            <View style={styles.cardContainer}>
+              <WeatherDetail title="일출" content="오전 7:07" />
+              <Line.Horizontal
+                alignItems="flex-end"
+                lineWidth={0.7}
+                width="87%"
+                lineColor="black"
+              />
+            </View>
+          </Card>
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -285,14 +339,31 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'gray',
-    alignItems: 'center',
+    padding: 20,
+  },
+  headerMenu: {
+    flex: 1,
+    marginTop: 30,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  headerText: {
+    flex: 2,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   main: {
     flex: 8,
     width: '95%',
   },
   cardContainer: { flex: 1, padding: 20 },
+  row: {
+    flexDirection: 'row',
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
 });
 
 export default Home;
